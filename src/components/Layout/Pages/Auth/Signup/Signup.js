@@ -8,6 +8,7 @@ import {
 } from "react-firebase-hooks/auth";
 import auth from "../../../../../firebase/firebase.init";
 import { useNavigate } from "react-router-dom";
+import useToken from "../../../../../hooks/useToken";
 
 const Signup = () => {
     //Create User with Email and Password
@@ -17,13 +18,15 @@ const Signup = () => {
     //To Update User Profile
     const [updateProfile, updating, updateError] = useUpdateProfile(auth);
 
+    const [token, tokenLoading] = useToken(user); //Getting Access Token
+
     //Handling Navigation
     const navigate = useNavigate();
     useEffect(() => {
-        if (user) {
+        if (token) {
             navigate("/");
         }
-    }, [user, navigate]);
+    }, [token, navigate]);
 
     //Joi Validation Schema
     const schema = Joi.object({
@@ -52,7 +55,7 @@ const Signup = () => {
     };
 
     //Handling Loading state
-    if (loading || updating) {
+    if (loading || updating || tokenLoading) {
         return <p className="text-3xl text-center my-20">Loading...</p>;
     }
 
@@ -126,7 +129,9 @@ const Signup = () => {
                 </div>
 
                 {(createError || updateError) && (
-                    <p className="text-red-400">{createError.message || updateError.message}</p>
+                    <p className="text-red-400">
+                        {createError.message || updateError.message}
+                    </p>
                 )}
 
                 <input
